@@ -1,7 +1,7 @@
 from mySHPB_lib import SHPB_test
 
 test_props = {
-    "filename": 'exp\Mg_11.03\RigolDS0.csv',
+    "filename": 'exp\Mg_11.03\RigolDS9.csv',
     "setupPropsFile": 'props2025march.json',
     "Ls/mm": 4.0,
     "Ds/mm": 7.8

@@ -1,15 +1,19 @@
+import os
+
+def prnt(s):
+    print('=' * os.get_terminal_size().columns)
+    print(s)
+
+prnt('loading standard modules')
 # ### Used Modules
 import pandas as pd
 import numpy as np
 import json
 
-import os
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-def prnt(s):
-    print('=' * os.get_terminal_size().columns)
-    print(s)
+prnt('standard modules loaded')
 
 def df_dydx(df, x, y):
     '''

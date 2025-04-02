@@ -10,8 +10,9 @@ import pandas as pd
 import numpy as np
 import json
 
-import seaborn as sns
+
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 prnt('standard modules loaded')
 
@@ -29,8 +30,9 @@ def df_int_ydx(df, x, y):
     '''
     return (df[y].shift(-1)+df[y])/2*(df[x].shift(-1)-df[x])
 
-class SHPB_test():
+class specimen():
     def __init__(self,
+                    setupPropsFile,
                     rm_window = 50,
                     trig_start = 250, # mu s
                     **kwargs,
@@ -41,12 +43,19 @@ class SHPB_test():
         It contains raw Voltage(Time) dependences from two channels of the oscilloscope.
         '''
 
+        if 'v0/m//s' in kwargs:
+            self.v0 = kwargs['v0/m//s']
+        else:
+            self.v0 = None
+
+        self.setupPropsFile = setupPropsFile
         # ### uploading json property file of the setup
-        with open(kwargs['setupPropsFile'], 'r') as file:
+        with open(setupPropsFile, 'r') as file:
             props = json.load(file)
 
+        self.filename = kwargs['filename']
         # ### V(t) for CH1 & CH2 are loaded into df
-        df = pd.read_csv(kwargs['filename'],
+        df = pd.read_csv(self.filename,
                         header=0,
                         names = ['Time/s', 'CH1/V', 'CH2/V']
         )
@@ -185,7 +194,10 @@ class SHPB_test():
         prnt(f'Strain Rate = {self.strainRate:.0f} 1/s')
         
 
-    def plot_diagrams(self):
+    def plot_diagrams(self,
+                        nosave = True,
+                        single = True,
+    ):
         sns.lineplot(data = self.dfP,
                         x = 'StrainTrue',
                         y='StressTrue/MPa',
@@ -196,10 +208,49 @@ class SHPB_test():
                         y='Stress/MPa',
                         label = f'Engineering diagram',
                     )
+        
+        if nosave == True:
+            if single:
+                plt.show()
+        else:
+            plt.savefig('diagrams.jpg')
     
-    def plot_diagram(self):
+    def plot_diagram(self,
+                        nosave = True,
+                        single = True,
+    ):
         sns.lineplot(data = self.dfP,
                         x = 'StrainTrue',
                         y='StressTrue/MPa',
                         label = f'Strain Rate {self.strainRate:.0f} 1/s',
                     )
+        if nosave == True:
+            if single:
+                plt.show()
+        else:
+            plt.savefig('diagram.jpg')
+
+
+
+
+class expSeries():
+    def __init__(self,
+                    NBfilename,
+                    setupPropsFile,
+                    dataDir,
+                    **kwargs,
+    ):
+        self.NBfilename = NBfilename
+        # ### reading the experimental notes
+        self.df = pd.read_excel(NBfilename,
+                            header=0,                      
+        )
+        records = self.df.to_dict(orient='record')
+        
+        tests = [specimen(setupPropsFile, **records[i]) for i in range(len(self.df.index))]
+
+        # ### creating all tested specimens
+        print(self.df.head())
+
+    def cheerUP(self):
+        prnt('Doing great, man!')

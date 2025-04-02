@@ -1,18 +1,14 @@
-from mySHPB_lib import SHPB_test
+from mySHPB_lib import specimen, expSeries
 
-test_props = {
-    "filename": 'exp\Mg_11.03\RigolDS9.csv',
-    "setupPropsFile": 'props2025march.json',
-    "Ls/mm": 4.0,
-    "Ds/mm": 7.8
-}
+import pathlib as pl
 
-exp = SHPB_test(**test_props)
+NBfilename = 'Mg_11.03.xlsx'
+dataDir = 'Mg_11.03'
 
-import matplotlib.pyplot as plt
+NB = expSeries(
+                NBfilename=NBfilename,
+                setupPropsFile='props2025march.json',
+                dataDir = dataDir,
+)
 
-exp.plot_diagrams()
-plt.show()
-
-exp.plot_diagram()
-plt.show()
+NB.cheerUP()

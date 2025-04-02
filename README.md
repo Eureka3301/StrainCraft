@@ -36,5 +36,12 @@ Actually it can be stored in the code, but the idea is to keep the lib immanent 
 |L1/m       | distance from the end of the rod to the first WB  |
 |L1/m       | distance from the end of the rod to the second WB |
 
-## main.py
+## calculate.py
 It is a file where one can work with the lib processing experiments conducted. :smile:
+First processing of the program and dumping to pickle.bin
+
+## debug.ipynb
+Returned to calibrate the program.
+
+## werkstat.py
+Working with joint experimental series.

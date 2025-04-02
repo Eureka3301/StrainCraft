@@ -191,6 +191,8 @@ class specimen():
 
         # ### Printing to terminal some info at the end of preprocessing
         # ### To calm down the nerves
+        if '№' in kwargs:
+            prnt(kwargs['№'])
         prnt(f'K = {K} MPa/mV, striker length = {striker} cm, impact velocity = {self.v0} m/s')
         prnt(f'Strain Rate = {self.strainRate:.0f} 1/s')
         
@@ -255,7 +257,16 @@ class expSeries():
 
         # ### printing the notes
         prnt()
-        print(self.df.head())
+        print(self.df)
+
+    def sortByStrainRate(self):
+        self.df.sort_values(by=['strainRate/1//s'], inplace=True)
+    def sortByNum(self):
+        self.df.sort_values(by=['№'], inplace=True)
+
+    def prnt(self):
+        prnt()
+        print(self.df)
 
     def cheerUP(self):
         prnt('Doing great, man!')

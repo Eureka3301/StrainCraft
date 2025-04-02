@@ -1,7 +1,6 @@
 # StrainCraft
 This is a small program that deals with raw data from the Rigol DS oscilloscope recording signals from the wheatstone bridges on the SHPB.
 
-* Now the program recalculates everything each time. The next step is to dump processed objects with __pickle__.
 * Extra calibration via striker speed can be added.
 
 * The program classes have a big mess in positional and keyword arguments. There is a great miscellaneous in filenames, workdirs and parameters.

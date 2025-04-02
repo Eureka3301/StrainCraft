@@ -1,6 +1,6 @@
 import os
 
-def prnt(s):
+def prnt(s = ''):
     print('=' * os.get_terminal_size().columns)
     print(s)
 
@@ -33,6 +33,7 @@ def df_int_ydx(df, x, y):
 class specimen():
     def __init__(self,
                     setupPropsFile,
+                    dataDir,
                     rm_window = 50,
                     trig_start = 250, # mu s
                     **kwargs,
@@ -43,8 +44,8 @@ class specimen():
         It contains raw Voltage(Time) dependences from two channels of the oscilloscope.
         '''
 
-        if 'v0/m//s' in kwargs:
-            self.v0 = kwargs['v0/m//s']
+        if 'v/m//s' in kwargs:
+            self.v0 = kwargs['v/m//s']
         else:
             self.v0 = None
 
@@ -53,7 +54,7 @@ class specimen():
         with open(setupPropsFile, 'r') as file:
             props = json.load(file)
 
-        self.filename = kwargs['filename']
+        self.filename = dataDir + r'/' + kwargs['filename']
         # ### V(t) for CH1 & CH2 are loaded into df
         df = pd.read_csv(self.filename,
                         header=0,
@@ -155,8 +156,8 @@ class specimen():
 
 
         # ### Stress(t) and Strain(t)
-        Ls = kwargs['Ls/mm'] # mm
-        Ds = kwargs['Ds/mm'] # mm
+        Ls = kwargs['H_s/mm'] # mm
+        Ds = kwargs['D_s/mm'] # mm
 
         As = np.pi*Ds*Ds/4 # mm2
 
@@ -190,7 +191,7 @@ class specimen():
 
         # ### Printing to terminal some info at the end of preprocessing
         # ### To calm down the nerves
-        prnt(f'K = {K} MPa/mV, striker length = {striker} cm, impact velocity = none m/s')
+        prnt(f'K = {K} MPa/mV, striker length = {striker} cm, impact velocity = {self.v0} m/s')
         prnt(f'Strain Rate = {self.strainRate:.0f} 1/s')
         
 
@@ -240,16 +241,20 @@ class expSeries():
                     dataDir,
                     **kwargs,
     ):
-        self.NBfilename = NBfilename
+        self.NBfilename = dataDir+ r'/' +NBfilename
         # ### reading the experimental notes
-        self.df = pd.read_excel(NBfilename,
+        self.df = pd.read_excel(self.NBfilename,
                             header=0,                      
         )
-        records = self.df.to_dict(orient='record')
-        
-        tests = [specimen(setupPropsFile, **records[i]) for i in range(len(self.df.index))]
+        records = self.df.to_dict(orient = 'records')
 
-        # ### creating all tested specimens
+        # ### creating all tested specimens        
+        self.tests = [specimen(setupPropsFile, dataDir = dataDir, **records[i]) for i in range(len(self.df.index))]
+
+        self.df['strainRate/1//s'] = [self.tests[i].strainRate for i in range(len(self.df.index))]
+
+        # ### printing the notes
+        prnt()
         print(self.df.head())
 
     def cheerUP(self):

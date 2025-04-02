@@ -101,7 +101,7 @@ class specimen():
 
         # ### start of incident, transmitted, reflected pulses
         # We find the beginning of the incident pulse by the prevailing of "zero" level (noiseZero MPa).
-        noiseZero = 0.5*K # MPa
+        noiseZero = 0.6*K # MPa
 
         i_start = df[df['CH1/MPa'] > noiseZero].index[0]
 
@@ -187,7 +187,7 @@ class specimen():
         dfP['StressTrue/MPa'] = dfP['Stress/MPa']*(1-dfP['Strain'])
 
         # ### Saving all the info we may need
-        self.dfP = dfP[['Time/mus', 'I/MPa', 'R/MPa', 'T/MPa', 'dotStrain', 'Strain', 'Stress/MPa', 'StrainTrue', 'StressTrue/MPa']]
+        self.dfP = dfP[['Time/mus', 'I/MPa', 'R/MPa', 'T/MPa', 'T-R/MPa', 'dotStrain', 'Strain', 'Stress/MPa', 'StrainTrue', 'StressTrue/MPa']]
 
         # ### Printing to terminal some info at the end of preprocessing
         # ### To calm down the nerves
@@ -233,7 +233,35 @@ class specimen():
         else:
             plt.savefig('diagram.jpg')
 
+    def plot_balance(self,
+                        nosave = True,
+                        single = True,
+    ):
+        sns.lineplot(data=self.dfP,
+                    x = 'Time/mus',
+                    y = 'I/MPa',
+                    label = 'Incident',)
 
+        sns.lineplot(data=self.dfP,
+                        x = 'Time/mus',
+                        y = 'R/MPa',
+                        label = 'Reflected',)
+
+        sns.lineplot(data=self.dfP,
+                        x = 'Time/mus',
+                        y = 'T/MPa',
+                        label = 'Transmitted',)
+
+        sns.lineplot(data=self.dfP,
+                        x = 'Time/mus',
+                        y = 'T-R/MPa',
+                        label = 'Transmitted-Reflected',)
+
+        if nosave == True:
+            if single:
+                plt.show()
+        else:
+            plt.savefig('balance.jpg')
 
 
 class expSeries():
@@ -267,6 +295,10 @@ class expSeries():
     def prnt(self):
         prnt()
         print(self.df)
+
+    def plot_diagrams(self, nums, single = False):
+        for num in nums:
+            self.tests[num].plot_diagram(single=single)
 
     def cheerUP(self):
         prnt('Doing great, man!')

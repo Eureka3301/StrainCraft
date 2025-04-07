@@ -18,6 +18,11 @@ For this purpose (as the specimens are mostly tested in series) the **expSeries*
 ## notebook.xlsx and rawdata.csv
 
 There is a strict format on input files. __I will write about it later.__ :crossed_fingers:
+Below are the column names (with examples) that must be in notebook .xlsx file not to crash the program.
+
+| H_s/mm | D_s/mm | v/m//s | filename |
+| ---    | ---    | ---    | ---      |
+| 5      | 8      | 5.6    | Al.csv   |
 
 ---
 

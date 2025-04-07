@@ -43,5 +43,8 @@ First processing of the program and dumping to pickle.bin
 ## debug.ipynb
 Returned to calibrate the program.
 
+## calculate.py
+Calculating dataframes once and dumping them in memory.
+
 ## werkstat.py
 Working with joint experimental series.

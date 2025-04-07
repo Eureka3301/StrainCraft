@@ -172,7 +172,7 @@ class specimen():
 
         dfP[['Time/mus', 'dotStrain', 'dStrain', 'Strain']].head()
 
-        self.strainRate = round(dfP['dotStrain'].mean()/100.0)*100
+        self.strainRate = round(dfP['dotStrain'].mean()/10.0)*10
 
 
         # ### d sigma / d epsilon. Specimen unloading cutting

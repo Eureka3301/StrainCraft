@@ -21,12 +21,78 @@ similiar = {
 }
 
 
-for num in similiar[900]:
-    
-    sns.lineplot(data = jointTest[num].dfP,
-                        x = 'StrainTrue',
-                        y='StressTrue/MPa',
-                        label = f'{num}, Strain Rate {jointTest[num].strainRate:.0f} 1/s',
-                    )
+# ## plotting similiar stress-strain curves
 
-plt.show()
+# for num in similiar[1800]:
+    
+#     sns.lineplot(data = jointTest[num].dfP,
+#                         x = 'StrainTrue',
+#                         y='StressTrue/MPa',
+#                         label = f'{num}, Strain Rate {jointTest[num].strainRate:.0f} 1/s',
+#                     )
+
+# plt.show()
+
+##################################
+
+# ## plotting Newgorod strain rate curves
+
+# strainRates = [
+#         985,
+#         1246,
+#         1326,
+#         1346,
+#         1362,
+#         1471,
+#         1627,
+#         1839,
+#         3281,
+#     ]
+
+# from Newgorod import upload_Newgorod
+
+# N, NGdfs, strainRate = upload_Newgorod()
+
+# for n in range(N):
+#     sns.lineplot(data=NGdfs[n],
+#                  x = 'StrainTrue',
+#                  y='StressTrue/MPa',
+#                  label = f'Strain Rate {strainRate[n]} 1/s',
+#                  )
+    
+# plt.show()
+
+###################################
+
+# ## plotting Newgorod and ours
+
+from Newgorod import upload_Newgorod
+
+N, NGdfs, strainRate = upload_Newgorod()
+
+
+similiarOursNums = [
+    [15,1,11,16,5],
+    [17],
+    [13],
+    [2],
+    [2],
+    [6,19],
+    [10],
+    [31],
+    [24],
+]
+
+for n in range(N):
+    sns.lineplot(data=NGdfs[n],
+                 x = 'StrainTrue',
+                 y='StressTrue/MPa',
+                 label = f'NG - Strain Rate {strainRate[n]} 1/s',
+                 )
+    for num in similiarOursNums[n]:
+        sns.lineplot(data = jointTest[num].dfP,
+                x = 'StrainTrue',
+                y='StressTrue/MPa',
+                label = f'{num}, Strain Rate {jointTest[num].strainRate:.0f} 1/s',
+            )
+    plt.show()

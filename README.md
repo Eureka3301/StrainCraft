@@ -1,17 +1,17 @@
 # StrainCraft
 This is a small program that deals with raw data from the Rigol DS oscilloscope recording signals from the wheatstone bridges on the SHPB.
 
-* Extra calibration via striker speed can be added.
-
-* The program classes have a big mess in positional and keyword arguments. There is a great miscellaneous in filenames, workdirs and parameters.
-* Right now it is the best version I could assemble.
-
 ---
 
-## mySHPB_lib.py
+## mySHPBlib.py
 It is the heart of the program. It contains the class **specimen** that corresponds to one tested specimen.
+The class can be constructed through file of oscilloscope.
+(but there is an option to load syncronised pulses **dfP**)
+
 All the processed info can be stored in this class for further consideration of this objects in whatever combinations.
-For this purpose (as the specimens are mostly tested in series) the **expSeries** class is built.
+For this purpose (as the specimens are mostly tested in series) the **journal** class is built.
+The class can be constructed by reading experimental notes from notebook.
+The records can be merged, dropped and whatever needed by corresponding procedures.
 
 ---
 
@@ -41,15 +41,5 @@ Actually it can be stored in the code, but the idea is to keep the lib immanent 
 |L1/m       | distance from the end of the rod to the first WB  |
 |L1/m       | distance from the end of the rod to the second WB |
 
-## calculate.py
-It is a file where one can work with the lib processing experiments conducted. :smile:
-First processing of the program and dumping to pickle.bin
-
-## debug.ipynb
-Returned to calibrate the program.
-
-## calculate.py
-Calculating dataframes once and dumping them in memory.
-
 ## werkstat.py
-Working with joint experimental series.
+The place one makes his dreams come true.

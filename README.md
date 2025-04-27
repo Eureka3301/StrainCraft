@@ -29,9 +29,10 @@ The *properties.json* contains record of bars parameters that stays mostly perma
 | parameter | description                                       |
 |---        |---                                                |
 |K/MPa//mV  | sensitivity of WB                                 |
-|d/mm       |bars diameter                                      |
-|rho/kg//m3 |bars density                                       |
-|E/GPa      | bars Young modulus                                ||
+|V0/V       | voltage on WB for the K coefficient               |
+|d/mm       | bars diameter                                     |
+|rho/kg//m3 | bars density                                      |
+|E/GPa      | bars Young modulus                                |
 |L1/m       | distance from the end of the rod to the first WB  |
 |L1/m       | distance from the end of the rod to the second WB |
 

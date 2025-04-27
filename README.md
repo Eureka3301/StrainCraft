@@ -29,7 +29,7 @@ The *properties.json* contains record of bars parameters that stays mostly perma
 | parameter | description                                       |
 |---        |---                                                |
 |K/MPa//mV  | sensitivity of WB                                 |
-|V0/V       | voltage on WB for the K coefficient               |
+|V0/V       | input voltage on WB for the K coefficient         |
 |d/mm       | bars diameter                                     |
 |rho/kg//m3 | bars density                                      |
 |E/GPa      | bars Young modulus                                |

@@ -14,9 +14,9 @@ The class can be constructed through file of oscilloscope.
 
 The crucial columns in *notebook.xlsx* are as follows.
 
-| H_s/mm | v/m//s | striker/m | filename |
-| ---    | ---    | ---       | ---      |
-| 5      | 5.6    | 0.6       | Al.csv   |
+| V0_CH1/V | V0_CH2/V | H_s/mm | v/m//s | striker/m | filename |
+| ---      |  ---     |  ---   | ---    | ---       | ---      |
+| 19.8     | 20.1     | 5      | 5.6    | 0.6       | Al.csv   |
 
 The each *rawdata.csv* file contains three columns.
 

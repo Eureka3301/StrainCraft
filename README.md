@@ -1,38 +1,109 @@
 # StrainCraft
 This is a small program that deals with raw data from the Rigol DS oscilloscope recording signals from the wheatstone bridges on the SHPB.
 
----
+**StrainCraft** — это графический интерфейс на Python для анализа и визуализации данных испытаний с установки *Разрезного Стержня Гопкинсона* (*Split Hopkinson Pressure Bar*). Программа позволяет загружать параметры установки и журналы испытаний, выполнять препроцессинг данных и строить различные графики для анализа напряженно-деформированного состояния образцов.
 
-## mySHPBlib.py
-It is the heart of the program. It contains the class **specimen** that corresponds to one tested specimen.
-The class can be constructed through file of oscilloscope.
-(but there is an option to load syncronised pulses **dfP**)
+## Возможности
 
----
+- Загрузка параметров установки из JSON-файла.
+- Загрузка журналов испытаний из Excel (.xlsx).
+- Автоматическое создание и отображение списка образцов.
+- Визуализация:
+  - **Сырые данные (Raw Data)**.
+  - **Баланс усилий (Balance)**.
+  - **Диаграммы напряжение-деформация (Stress-Strain)**.
+  - **Деформации и скорости деформации (Strain / Strain Rate)**.
+- Настройка параметров препроцессинга:
+  - Размер окна сглаживания.
+  - Настройки триггера и нулевого уровня.
 
-## notebook.xlsx and rawdata.csv and properties.json
+## Основные зависимости
 
-The crucial columns in *notebook.xlsx* are as follows.
+- `PyQt5`
+- `matplotlib`
+- `seaborn`
+- `pandas`
+
+Убедитесь, что установлены все зависимости:
+
+```bash
+pip install -r requirements.txt
+```
+
+**`requirements.txt`:**
+
+```
+PyQt5
+matplotlib
+seaborn
+pandas
+```
+
+## Структура проекта
+
+```
+project/
+│
+├── GUI.py            # Основной файл GUI
+├── Core.py            # Модуль с классом Specimen (необходимо)
+├── requirements.txt   # Зависимости
+├── README.md          # Этот файл
+└── data/              # Примеры журналов испытаний и JSON (по желанию)
+```
+
+## Как запустить
+
+```bash
+python GUI.py
+```
+
+## Как использовать
+
+1. **Загрузите параметры установки:**
+   - Нажмите кнопку «Загрузить параметры из JSON» и выберите JSON-файл с параметрами.
+
+2. **Загрузите журнал испытаний:**
+   - Нажмите «Загрузить журнал испытаний (xlsx)» и выберите Excel-файл с данными испытаний.
+   - Образцы появятся в таблице. Можно выбрать несколько образцов для построения графиков.
+
+3. **Настройте параметры препроцессинга:**
+   - Используйте спинбоксы для установки параметров сглаживания и триггера.
+   - Нажмите «Обновить препроцессинг» для применения изменений ко всем образцам.
+
+4. **Стройте графики:**
+   - Выберите нужные образцы в таблице и используйте соответствующие кнопки:
+     - **Построить весь сигнал**
+     - **Построить баланс**
+     - **Построить диаграмму**
+     - **Построить деформации**
+
+## Примечания
+
+- В коде используется внешний класс `Specimen` из модуля `Core.py`. Убедитесь, что этот файл находится в той же директории или укажите правильный путь.
+- Журнал испытаний должен содержать столбец `filename` с именами файлов данных. Пути автоматически дополняются до полного пути.
+
+- The crucial columns in *notebook.xlsx* are as follows.
 
 | V0_CH1/V | V0_CH2/V | H_s/mm | v/m//s | striker/m | filename |
 | ---      |  ---     |  ---   | ---    | ---       | ---      |
 | 19.8     | 20.1     | 5      | 5.6    | 0.6       | Al.csv   |
 
-The each *rawdata.csv* file contains three columns.
+- The each *rawdata.csv* file contains three columns.
 
 | Time(s) | CH1(V) | CH2(V) |
 | ---     | ---    | ---    |
 | 0.0000  | 0.0000 | 0.0000 |
 
-The *properties.json* contains record of bars parameters that stays mostly permanent.
+- The *properties.json* contains record of bars parameters that stays mostly permanent.
 
 | parameter | description                                       |
 |---        |---                                                |
 |K/MPa//mV  | sensitivity of WB                                 |
-|V0/V       | input voltage on WB for the K coefficient         |
 |d/mm       | bars diameter                                     |
 |rho/kg//m3 | bars density                                      |
 |E/GPa      | bars Young modulus                                |
 |L1/m       | distance from the end of the rod to the first WB  |
 |L1/m       | distance from the end of the rod to the second WB |
+
+
 

@@ -128,8 +128,8 @@ class SHPB_GUI(QWidget):
 
         # Таблица для отображения образцов
         self.specimen_table = QTableWidget()
-        self.specimen_table.setColumnCount(2)
-        self.specimen_table.setHorizontalHeaderLabels(["Номер образца", "StrainRate"])
+        self.specimen_table.setColumnCount(3)
+        self.specimen_table.setHorizontalHeaderLabels(["Номер", "Материал", "StrainRate"])
         self.specimen_table.setSelectionBehavior(QTableWidget.SelectRows)
         self.specimen_table.setSelectionMode(QTableWidget.MultiSelection)
         self.specimen_table.itemSelectionChanged.connect(self.update_active_specimens)
@@ -139,6 +139,8 @@ class SHPB_GUI(QWidget):
         self.specimen_table.setContextMenuPolicy(Qt.CustomContextMenu)
         self.specimen_table.customContextMenuRequested.connect(self.open_context_menu)
 
+        # Подключаем клик по заголовку таблицы
+        self.specimen_table.horizontalHeader().sectionClicked.connect(self.handle_header_click)
 
         # Кнопка для обновления всех образцов с новыми параметрами
         self.update_specimens_button = QPushButton("Обновить препроцессинг")
@@ -229,7 +231,8 @@ class SHPB_GUI(QWidget):
         for idx, specimen in enumerate(self.specimens):
             self.specimen_table.insertRow(idx)
             self.specimen_table.setItem(idx, 0, QTableWidgetItem(str(idx + 1)))
-            self.specimen_table.setItem(idx, 1, QTableWidgetItem(str(specimen.strainRate)))
+            self.specimen_table.setItem(idx, 1, QTableWidgetItem(str(specimen.record.get('Material', ''))))
+            self.specimen_table.setItem(idx, 2, QTableWidgetItem(str(specimen.strainRate)))
 
     def open_context_menu(self, position):
         indexes = self.specimen_table.selectedIndexes()
@@ -248,6 +251,24 @@ class SHPB_GUI(QWidget):
 
                 # Обновляем таблицу заново после удаления
                 self.refresh_specimen_table()
+
+    def handle_header_click(self, logical_index):
+        """
+        Сортировка specimens по выбранному столбцу при клике по заголовку.
+        logical_index: индекс колонки, по которой кликнули (0 или 1).
+        """
+        if logical_index == 0:
+            # Сортируем по номеру образца (здесь просто по индексу)
+            self.specimens.sort(key=lambda specimen: specimen.id if hasattr(specimen, 'id') else 0)
+        elif logical_index == 1:
+            self.specimens.sort(key=lambda specimen: specimen.record.get('Material', ''))
+        elif logical_index == 2:
+            # Сортируем по strainRate
+            self.specimens.sort(key=lambda specimen: specimen.strainRate)
+
+
+        self.refresh_specimen_table()
+
 
     def load_journal(self):
         """Загружаем журнал испытаний из файла .xlsx и создаем Specimen объекты."""

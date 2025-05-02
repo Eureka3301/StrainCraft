@@ -1,7 +1,7 @@
 import sys, os
 import json
 from PyQt5.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QHBoxLayout,
+    QApplication, QWidget, QVBoxLayout, QHBoxLayout, QSpinBox, QDoubleSpinBox,
     QPushButton, QFileDialog, QTableWidget, QTableWidgetItem, QLabel, QDialog
 )
 
@@ -18,6 +18,8 @@ class MatplotlibCanvas(FigureCanvas):
         fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(111)
         super().__init__(fig)
+
+        self.ax2 = None
 
 class SettingsDialog(QDialog):
     """Диалоговое окно для загрузки и редактирования параметров установки"""
@@ -151,6 +153,44 @@ class SHPB_GUI(QWidget):
         self.plot_diagram_button.clicked.connect(self.plot_diagram)
         left_panel.addWidget(self.plot_diagram_button)
 
+        self.plot_strain_button = QPushButton("Построить деформации")
+        self.plot_strain_button.clicked.connect(self.plot_strain)
+        left_panel.addWidget(self.plot_strain_button)
+
+        self.smoothing_layout = QHBoxLayout()
+        self.smoothing_label = QLabel("Количество точек для скользящего среднего:")
+        self.smoothing_spinbox = QSpinBox()
+        self.smoothing_spinbox.setMinimum(1)
+        self.smoothing_spinbox.setMaximum(1000)
+        self.smoothing_spinbox.setValue(50)  # Значение по умолчанию
+
+        self.smoothing_layout.addWidget(self.smoothing_label)
+        self.smoothing_layout.addWidget(self.smoothing_spinbox)
+        left_panel.addLayout(self.smoothing_layout)
+
+        self.trig_start_layout = QHBoxLayout()
+        self.trig_start_label = QLabel("Общая часть нулевого уровня (мкс):")
+        self.trig_start_spinbox = QSpinBox()
+        self.trig_start_spinbox.setMinimum(1)
+        self.trig_start_spinbox.setMaximum(1000)
+        self.trig_start_spinbox.setValue(50)  # Значение по умолчанию
+
+        self.trig_start_layout.addWidget(self.trig_start_label)
+        self.trig_start_layout.addWidget(self.trig_start_spinbox)
+        left_panel.addLayout(self.trig_start_layout)
+
+        self.zeroCoef_spinbox_layout = QHBoxLayout()
+        self.zeroCoef_spinbox_label = QLabel("Триггер нулевого уровня (часть от K):")
+        self.zeroCoef_spinbox = QDoubleSpinBox()
+        self.zeroCoef_spinbox.setDecimals(2)  # например, 2 знака после запятой
+        self.zeroCoef_spinbox.setSingleStep(0.1)  # шаг изменения при клике
+        self.zeroCoef_spinbox.setRange(0.0, 10.0)  # например, задаем долю от 0 до 10
+        self.zeroCoef_spinbox.setValue(1.0)  # значение по умолчанию
+
+        self.zeroCoef_spinbox_layout.addWidget(self.zeroCoef_spinbox_label)
+        self.zeroCoef_spinbox_layout.addWidget(self.zeroCoef_spinbox)
+        left_panel.addLayout(self.zeroCoef_spinbox_layout)
+
         # Правая панель для графика
         right_panel = QVBoxLayout()
         self.canvas = MatplotlibCanvas(self, width=6, height=5, dpi=100)
@@ -170,7 +210,12 @@ class SHPB_GUI(QWidget):
     def create_specimens_from_dataframe(self, df):
         """Создает Specimen-объекты из DataFrame и сохраняет их в self.specimens."""
         for _, row in df.iterrows():
-            specimen = Specimen(**row.to_dict(), **self.settings_data)
+            GUI_parameters = {
+                'rm_window':self.smoothing_spinbox.value(),
+                'trig_start':self.trig_start_spinbox.value(),
+                'zeroCoef':self.zeroCoef_spinbox.value()
+            }
+            specimen = Specimen(**GUI_parameters, **row.to_dict(), **self.settings_data)
             self.specimens.append(specimen)
 
     def refresh_specimen_table(self):
@@ -181,6 +226,7 @@ class SHPB_GUI(QWidget):
             self.specimen_table.insertRow(idx)
             self.specimen_table.setItem(idx, 0, QTableWidgetItem(str(idx + 1)))
             self.specimen_table.setItem(idx, 1, QTableWidgetItem(str(specimen.strainRate)))
+
 
     def load_journal(self):
         """Загружаем журнал испытаний из файла .xlsx и создаем Specimen объекты."""
@@ -213,14 +259,24 @@ class SHPB_GUI(QWidget):
         for specimen in self.specimens:
             record = specimen.record
             record.update(self.settings_data)
+            GUI_parameters = {
+                'rm_window':self.smoothing_spinbox.value(),
+                'trig_start':self.trig_start_spinbox.value(),
+                'zeroCoef':self.zeroCoef_spinbox.value()
+            }
+            record.update(GUI_parameters)
             specimen(**record)
         self.refresh_specimen_table()
-        
+
+
     def plot_diagram(self):
         if not self.active_specimens:
             print("Нет активных образцов для построения.")
             return
 
+        if self.canvas.ax2:
+            self.canvas.ax2.remove()
+            self.canvas.ax2 = None
         self.canvas.axes.clear()
 
         for number, specimen in self.active_specimens:
@@ -242,6 +298,9 @@ class SHPB_GUI(QWidget):
             print("Нет активных образцов для построения.")
             return
 
+        if self.canvas.ax2:
+            self.canvas.ax2.remove()
+            self.canvas.ax2 = None
         self.canvas.axes.clear()
 
         for number, specimen in self.active_specimens:
@@ -284,6 +343,9 @@ class SHPB_GUI(QWidget):
             print("Нет активных образцов для построения.")
             return
 
+        if self.canvas.ax2:
+            self.canvas.ax2.remove()
+            self.canvas.ax2 = None
         self.canvas.axes.clear()
 
         for number, specimen in self.active_specimens:
@@ -308,6 +370,60 @@ class SHPB_GUI(QWidget):
         self.canvas.axes.set_ylabel("Напряжение (МПа)")
         self.canvas.draw()
 
+    def plot_strain(self):
+        if not self.active_specimens:
+            print("Нет активных образцов для построения.")
+            return
+
+        if self.canvas.ax2:
+            self.canvas.ax2.remove()
+            self.canvas.ax2 = None
+        self.canvas.axes.clear()
+
+        self.canvas.ax2=self.canvas.axes.twinx()
+
+        for number, specimen in self.active_specimens:
+            
+            # Левый график: strain
+            sns.lineplot(
+                data=specimen.dfP,
+                x='Time/mus',
+                y='Strain',
+                ax=self.canvas.axes,
+                label=f"Specimen {number} strain"
+            )
+            sns.lineplot(
+                data=specimen.dfP,
+                x='Time/mus',
+                y='StrainTrue',
+                ax=self.canvas.axes,
+                label=f"Specimen {number} true strain"
+            )
+            
+            # Правый график: strainRate
+            sns.lineplot(
+                data=specimen.dfP,
+                x='Time/mus',
+                y='dotStrain',
+                ax=self.canvas.ax2,
+                label=f"Specimen {number} dot strain"
+            )
+            sns.lineplot(
+                data=specimen.dfP,
+                x='Time/mus',
+                y='dotStrainTrue',
+                ax=self.canvas.ax2,
+                label=f"Specimen {number} dot true strain"
+            )
+
+        self.canvas.axes.set_xlabel("Время (мкс)")
+        self.canvas.axes.set_ylabel("Strain Rate")
+        self.canvas.ax2.set_ylabel("Strain")
+
+        # Чтобы легенда работала корректно
+        self.canvas.axes.legend()
+
+        self.canvas.draw()
 
 
 if __name__ == "__main__":

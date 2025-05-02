@@ -84,8 +84,8 @@ class Specimen():
         E = kwargs['E/GPa'] # GPa
 
         # ### The stress and strain pulses in the bars
-        self.df['CH1/MPa'] = self.df['CH1/V/zero'] * K*1e+3
-        self.df['CH2/MPa'] = self.df['CH2/V/zero'] * K*1e+3
+        self.df['CH1/MPa'] = self.df['CH1/V/zero'] * K*1e+3 * 20.0/kwargs['V0_CH1/V']
+        self.df['CH2/MPa'] = self.df['CH2/V/zero'] * K*1e+3 * 20.0/kwargs['V0_CH2/V']
 
         self.df['CH1/strain'] = self.df['CH1/MPa'] / E *1e-3
         self.df['CH2/strain'] = self.df['CH2/MPa'] / E * 1e-3
@@ -122,7 +122,7 @@ class Specimen():
         dfT['Time/mus'] = dfT['Time/mus'].shift(t_start)
 
         striker = kwargs['striker/cm'] # cm
-        T = 2*striker*1e-2 / c * 1e+6 # mus
+        T = 2*2*striker*1e-2 / c * 1e+6 # mus
 
         dfI = dfI[dfI['Time/mus']<T].dropna()
         dfT = dfT[dfT['Time/mus']<T].dropna()
@@ -171,8 +171,6 @@ class Specimen():
 
         self.dfP[['Time/mus', 'dotStrain', 'dStrain', 'Strain']].head()
 
-        self.strainRate = round(self.dfP['dotStrain'].mean()/10.0)*10
-
 
         # ### d sigma / d epsilon. Specimen unloading cutting
         self.dfP['E(eps)/MPa'] = df_dydx(self.dfP, y='Stress/MPa', x='Strain')
@@ -182,8 +180,11 @@ class Specimen():
         self.dfP.drop(self.dfP.iloc[unload:].index, inplace=True)
 
         # ### Calculating True Stress and Strain
+        self.dfP['dotStrainTrue'] = self.dfP['dotStrain']/(1-self.dfP['Strain'])
         self.dfP['StrainTrue'] = -np.log(1-self.dfP['Strain'])
         self.dfP['StressTrue/MPa'] = self.dfP['Stress/MPa']*(1-self.dfP['Strain'])
+
+        self.strainRate = round(self.dfP['dotStrainTrue'].mean()/10.0)*10
 
         self.record = kwargs
 

@@ -82,19 +82,19 @@ python GUI.py
 - В коде используется внешний класс `Specimen` из модуля `Core.py`. Убедитесь, что этот файл находится в той же директории или укажите правильный путь.
 - Журнал испытаний должен содержать столбец `filename` с именами файлов данных. Пути автоматически дополняются до полного пути.
 
-- The crucial columns in *notebook.xlsx* are as follows.
+- The crucial columns in 'notebook.xlsx' are as follows.
 
 | V0_CH1/V | V0_CH2/V | H_s/mm | v/m//s | striker/m | filename |
 | ---      |  ---     |  ---   | ---    | ---       | ---      |
 | 19.8     | 20.1     | 5      | 5.6    | 0.6       | Al.csv   |
 
-- The each *rawdata.csv* file contains three columns.
+- The each 'rawdata.csv' file contains three columns.
 
 | Time(s) | CH1(V) | CH2(V) |
 | ---     | ---    | ---    |
 | 0.0000  | 0.0000 | 0.0000 |
 
-- The *properties.json* contains record of bars parameters that stays mostly permanent.
+- The 'properties.json' contains record of bars parameters that stays mostly permanent.
 
 | parameter | description                                       |
 |---        |---                                                |

@@ -2,7 +2,7 @@ import sys, os
 import json
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, QSpinBox, QDoubleSpinBox,
-    QPushButton, QFileDialog, QTableWidget, QTableWidgetItem, QLabel, QDialog
+    QPushButton, QFileDialog, QTableWidget, QTableWidgetItem, QLabel, QDialog, QMenu
 )
 
 from PyQt5.QtCore import Qt
@@ -136,6 +136,10 @@ class SHPB_GUI(QWidget):
         left_panel.addWidget(QLabel("Список образцов:"))
         left_panel.addWidget(self.specimen_table)
 
+        self.specimen_table.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.specimen_table.customContextMenuRequested.connect(self.open_context_menu)
+
+
         # Кнопка для обновления всех образцов с новыми параметрами
         self.update_specimens_button = QPushButton("Обновить препроцессинг")
         self.update_specimens_button.clicked.connect(self.update_all_specimens)
@@ -227,6 +231,23 @@ class SHPB_GUI(QWidget):
             self.specimen_table.setItem(idx, 0, QTableWidgetItem(str(idx + 1)))
             self.specimen_table.setItem(idx, 1, QTableWidgetItem(str(specimen.strainRate)))
 
+    def open_context_menu(self, position):
+        indexes = self.specimen_table.selectedIndexes()
+        column_0_indexes = [index for index in indexes if index.column() == 0]
+        rows_to_delete = set(index.row() for index in column_0_indexes)
+        if rows_to_delete:
+            menu = QMenu()
+            delete_action = menu.addAction("Удалить образец")
+            action = menu.exec_(self.specimen_table.viewport().mapToGlobal(position))
+            if action == delete_action:
+                # Перезаписываем specimens, исключая удаляемые
+                self.specimens = [
+                    specimen for idx, specimen in enumerate(self.specimens)
+                    if idx not in rows_to_delete
+                ]
+
+                # Обновляем таблицу заново после удаления
+                self.refresh_specimen_table()
 
     def load_journal(self):
         """Загружаем журнал испытаний из файла .xlsx и создаем Specimen объекты."""

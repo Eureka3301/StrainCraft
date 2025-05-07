@@ -101,7 +101,7 @@ class SHPB_GUI(QWidget):
         super().__init__()
 
         self.setWindowTitle("SHPB GUI")
-        self.setGeometry(100, 100, 1000, 600)
+        self.setGeometry(100, 100, 1200, 600)
 
         self.settings_data = {}  # Сюда будут загружаться параметры установки
         self.active_specimens = []  # Список для хранения активных образцов
@@ -128,8 +128,8 @@ class SHPB_GUI(QWidget):
 
         # Таблица для отображения образцов
         self.specimen_table = QTableWidget()
-        self.specimen_table.setColumnCount(3)
-        self.specimen_table.setHorizontalHeaderLabels(["Номер", "Материал", "StrainRate"])
+        self.specimen_table.setColumnCount(4)
+        self.specimen_table.setHorizontalHeaderLabels(["Номер", "Материал", "StrainRate", "notes"])
         self.specimen_table.setSelectionBehavior(QTableWidget.SelectRows)
         self.specimen_table.setSelectionMode(QTableWidget.MultiSelection)
         self.specimen_table.itemSelectionChanged.connect(self.update_active_specimens)
@@ -205,7 +205,7 @@ class SHPB_GUI(QWidget):
 
         # Добавляем обе панели в главный layout
         main_layout.addLayout(left_panel, 1)
-        main_layout.addLayout(right_panel, 3)
+        main_layout.addLayout(right_panel, 2)
 
         self.setLayout(main_layout)
 
@@ -233,6 +233,7 @@ class SHPB_GUI(QWidget):
             self.specimen_table.setItem(idx, 0, QTableWidgetItem(str(idx + 1)))
             self.specimen_table.setItem(idx, 1, QTableWidgetItem(str(specimen.record.get('Material', ''))))
             self.specimen_table.setItem(idx, 2, QTableWidgetItem(str(specimen.strainRate)))
+            self.specimen_table.setItem(idx, 3, QTableWidgetItem(str(specimen.record.get('notes', ''))))
 
     def open_context_menu(self, position):
         indexes = self.specimen_table.selectedIndexes()

@@ -122,7 +122,7 @@ class Specimen():
         dfT['Time/mus'] = dfT['Time/mus'].shift(t_start)
 
         striker = kwargs['striker/cm'] # cm
-        T = 2*2*striker*1e-2 / c * 1e+6 # mus
+        T = 2*striker*1e-2 / c * 1e+6 # mus
 
         dfI = dfI[dfI['Time/mus']<T].dropna()
         dfT = dfT[dfT['Time/mus']<T].dropna()
@@ -161,23 +161,25 @@ class Specimen():
         As = np.pi*Ds*Ds/4 # mm2
 
         # average stress in the specimen
-        # dfP['Stress/MPa'] = 1/2*S/As*(dfP['I/MPa']+dfP['R/MPa']+dfP['T/MPa'])
+        # self.dfP['Stress/MPa'] = 1/2*S/As*(self.dfP['I/MPa']+self.dfP['R/MPa']+self.dfP['T/MPa'])
         # stress going through the specimen
-        self.dfP['Stress/MPa'] = S/As*(self.dfP['T/MPa'])
-        self.dfP['I-R-T/MPa'] = self.dfP['I/MPa']-self.dfP['R/MPa']-self.dfP['T/MPa']
-        self.dfP['dotStrain'] = c/Ls*1e+3 * 1e-9/E * (self.dfP['I/MPa']-self.dfP['R/MPa']-self.dfP['T/MPa'])*1e+6
+        # self.dfP['Stress/MPa'] = S/As*(self.dfP['T/MPa'])
+        
+        self.dfP['Stress/MPa'] = 1/2*S/As*(self.dfP['I/MPa']+self.dfP['R/MPa']+self.dfP['T/MPa'])
+        
+        self.dfP['dotStrain'] = c/Ls*1e+3 * 1e-9/E * (-self.dfP['R/MPa']+(self.dfP['I/MPa']-self.dfP['T/MPa']))*1e+6
         self.dfP['dStrain'] = df_int_ydx(self.dfP, y='dotStrain', x='Time/mus')*1e-6
         self.dfP['Strain'] = self.dfP['dStrain'].cumsum()
 
         self.dfP[['Time/mus', 'dotStrain', 'dStrain', 'Strain']].head()
 
 
-        # ### d sigma / d epsilon. Specimen unloading cutting
-        self.dfP['E(eps)/MPa'] = df_dydx(self.dfP, y='Stress/MPa', x='Strain')
-        self.dfP['E(eps)/MPa'] = self.dfP['E(eps)/MPa'].rolling(kwargs['rm_window']).mean()
-        unload = self.dfP['E(eps)/MPa'].idxmin()
+        # # ### d sigma / d epsilon. Specimen unloading cutting
+        # self.dfP['E(eps)/MPa'] = df_dydx(self.dfP, y='Stress/MPa', x='Strain')
+        # self.dfP['E(eps)/MPa'] = self.dfP['E(eps)/MPa'].rolling(kwargs['rm_window']).mean()
+        # unload = self.dfP['E(eps)/MPa'].idxmin()
 
-        self.dfP.drop(self.dfP.iloc[unload:].index, inplace=True)
+        # self.dfP.drop(self.dfP.iloc[unload:].index, inplace=True)
 
         # ### Calculating True Stress and Strain
         self.dfP['dotStrainTrue'] = self.dfP['dotStrain']/(1-self.dfP['Strain'])
@@ -217,23 +219,3 @@ class Specimen():
         prnt(f'Strain Rate = {self.strainRate:.0f} 1/s')
 
         self.record = kwargs
-
-class Sample():
-    def __init__(self, **kwargs):
-        
-        # ### reading the experimental notes
-        self.journal = pd.read_excel(kwargs['nbFilename'], header=0)
-
-        folder_path = os.path.dirname(kwargs['nbFilename'])
-        self.journal['filename'] = folder_path+r'/'+self.journal['filename']
-
-        records = self.journal.to_dict(orient = 'records')
-
-        # ### creating all tested specimens        
-        self.specimens = [Specimen(rm_window=100,trig_start=50,**kwargs, **records[i]) for i in range(len(self.journal.index))]
-
-        self.journal['strainRate/1//s'] = [self.specimens[i].strainRate for i in range(len(self.journal.index))]
-
-        # ### printing the notes
-        prnt()
-        print(self.journal)

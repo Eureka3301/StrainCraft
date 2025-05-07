@@ -95,6 +95,7 @@ class SettingsDialog(QDialog):
                 self.settings_data[key] = value
 
         print("Изменения сохранены:", self.settings_data)
+        self.accept()
 
 class SHPB_GUI(QWidget):
     def __init__(self):
@@ -406,7 +407,17 @@ class SHPB_GUI(QWidget):
                 ax=self.canvas.axes,
                 label=f"Specimen {number} CH2"
             )
-        
+            try:
+                from numpy import sqrt
+                c = sqrt(self.settings_data["E/GPa"]*1e+9/self.settings_data["rho/kg//m3"])
+                y = self.settings_data["rho/kg//m3"]*c*float(specimen.record['v/m//s'])/2 * 1e-6
+                print(f'velocity claibration {y} MPa')
+                xmin = specimen.df.iloc[0]['Time/mus']
+                xmax = specimen.df.iloc[-1]['Time/mus']
+                self.canvas.axes.hlines(y, xmin, xmax, color='r')
+            except Exception as e:
+                print(f'Could not calibrate {e}')
+
         self.canvas.axes.legend()  # показываем легенду с номерами образцов
         self.canvas.axes.set_title("Графики активных образцов")
         self.canvas.axes.set_xlabel("Время (мкс)")

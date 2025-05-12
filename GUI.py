@@ -1,7 +1,7 @@
 import sys, os
 import json
 from PyQt5.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QHBoxLayout, QSpinBox, QDoubleSpinBox,
+    QApplication, QWidget, QVBoxLayout, QHBoxLayout, QSpinBox, QDoubleSpinBox, QMessageBox,
     QPushButton, QFileDialog, QTableWidget, QTableWidgetItem, QLabel, QDialog, QMenu
 )
 
@@ -197,6 +197,11 @@ class SHPB_GUI(QWidget):
         self.zeroCoef_spinbox_layout.addWidget(self.zeroCoef_spinbox_label)
         self.zeroCoef_spinbox_layout.addWidget(self.zeroCoef_spinbox)
         left_panel.addLayout(self.zeroCoef_spinbox_layout)
+
+        self.save_xlsx_button = QPushButton("Сохранить выбранные образцы в Excel")
+        self.save_xlsx_button.clicked.connect(self.save_specimens_to_excel)
+        left_panel.addWidget(self.save_xlsx_button)
+
 
         # Правая панель для графика
         right_panel = QVBoxLayout()
@@ -411,7 +416,7 @@ class SHPB_GUI(QWidget):
                 from numpy import sqrt
                 c = sqrt(self.settings_data["E/GPa"]*1e+9/self.settings_data["rho/kg//m3"])
                 y = self.settings_data["rho/kg//m3"]*c*float(specimen.record['v/m//s'])/2 * 1e-6
-                print(f'velocity claibration {y} MPa')
+                #print(f'velocity claibration {y} MPa')
                 xmin = specimen.df.iloc[0]['Time/mus']
                 xmax = specimen.df.iloc[-1]['Time/mus']
                 self.canvas.axes.hlines(y, xmin, xmax, color='r')
@@ -478,6 +483,41 @@ class SHPB_GUI(QWidget):
         self.canvas.axes.legend()
 
         self.canvas.draw()
+
+    def save_specimens_to_excel(self):
+        """Сохраняет dfP каждого specimen в отдельный лист Excel."""
+        if not self.specimens:
+            print("Нет данных для сохранения.")
+            return
+
+        filename, _ = QFileDialog.getSaveFileName(self, "Сохранить Excel-файл", "", "Excel Files (*.xlsx)")
+        if not filename:
+            return
+        
+        if not filename.endswith('.xlsx'):
+            filename += '.xlsx'
+
+        # # Проверка: если файл существует, спросить подтверждение
+        # if os.path.exists(filename):
+        #     reply = QMessageBox.question(
+        #         self,
+        #         "Файл существует",
+        #         f"Файл '{os.path.basename(filename)}' уже существует. Перезаписать?",
+        #         QMessageBox.Yes | QMessageBox.No,
+        #         QMessageBox.No
+        #     )
+        #     if reply != QMessageBox.Yes:
+        #         return  # Отменяем сохранение
+
+        try:
+            with pd.ExcelWriter(filename, engine='openpyxl') as writer:
+                for idx, specimen in self.active_specimens:
+                    sheet_name = f"Specimen_{idx}_{specimen.record.get('notes', '')}"
+                    specimen.dfP.to_excel(writer, sheet_name=sheet_name, index=False)
+            QMessageBox.information(self, "Сохранение", f"Файл успешно сохранён:\n{filename}")
+        except Exception as e:
+            QMessageBox.critical(self, "Ошибка", f"Ошибка при сохранении: {e}")
+
 
 
 if __name__ == "__main__":

@@ -5,17 +5,16 @@ This is a small program that deals with raw data from the Rigol DS oscilloscope 
 
 ## Возможности
 
-- Загрузка параметров установки из JSON-файла.
-- Загрузка журналов испытаний из Excel (.xlsx).
-- Автоматическое создание и отображение списка образцов.
+- Загрузка параметров установки из JSON
+- Импорт журнала испытаний из Excel (.xlsx)
 - Визуализация:
-  - **Сырые данные (Raw Data)**.
-  - **Баланс усилий (Balance)**.
-  - **Диаграммы напряжение-деформация (Stress-Strain)**.
-  - **Деформации и скорости деформации (Strain / Strain Rate)**.
-- Настройка параметров препроцессинга:
-  - Размер окна сглаживания.
-  - Настройки триггера и нулевого уровня.
+  - Исходных сигналов (CH1, CH2) с калибровочной линией
+  - Баланса импульсов (I, R, T, I+R)
+  - Истинной диаграммы напряжение-деформация
+  - Деформаций и скоростей деформаций (strain, strain rate)
+- Настройка сглаживания, нулевого уровня и триггера (параметры препроцессора)
+- Выбор и удаление образцов из таблицы
+- Сохранение данных активных образцов в Excel-файл
 
 ## Основные зависимости
 
@@ -23,8 +22,10 @@ This is a small program that deals with raw data from the Rigol DS oscilloscope 
 - `matplotlib`
 - `seaborn`
 - `pandas`
+- `numpy`
+- `openpyxl`
 
-Убедитесь, что установлены все зависимости:
+Установка всех зависимостей:
 
 ```bash
 pip install -r requirements.txt
@@ -37,27 +38,27 @@ PyQt5
 matplotlib
 seaborn
 pandas
+numpy
+openpyxl
 ```
 
 ## Структура проекта
 
 ```
-project/
-│
-├── GUI.py            # Основной файл GUI
-├── Core.py            # Модуль с классом Specimen (необходимо)
-├── requirements.txt   # Зависимости
-├── README.md          # Этот файл
-└── data/              # Примеры журналов испытаний и JSON (по желанию)
+├── main.py                  # Основной GUI код
+├── Core/
+│   └── Specimen.py          # Модель обработки данных одного образца
+├── requirements.txt         # Список зависимостей
+└── README.md                # Этот файл
 ```
 
-## Как запустить
+## Запуск через терминал
 
 ```bash
 python GUI.py
 ```
 
-## Как использовать
+## Руководство
 
 1. **Загрузите параметры установки:**
    - Нажмите кнопку «Загрузить параметры из JSON» и выберите JSON-файл с параметрами.
@@ -76,6 +77,7 @@ python GUI.py
      - **Построить баланс**
      - **Построить диаграмму**
      - **Построить деформации**
+     - **Сохранить выбранные образцы в Excel**
 
 ## Примечания
 
@@ -84,9 +86,9 @@ python GUI.py
 
 - The crucial columns in `notebook.xlsx` are as follows.
 
-| V0_CH1/V | V0_CH2/V | H_s/mm | v/m//s | striker/m | filename |
+| V0_CH1/V | V0_CH2/V | H_s/mm | v/m//s | striker/сm | filename |
 | ---      |  ---     |  ---   | ---    | ---       | ---      |
-| 19.8     | 20.1     | 5      | 5.6    | 0.6       | Al.csv   |
+| 19.8     | 20.1     | 5      | 5.6    | 60        | Al.csv   |
 
 - The each `rawdata.csv` file contains three columns.
 
@@ -103,7 +105,7 @@ python GUI.py
 |rho/kg//m3 | bars density                                      |
 |E/GPa      | bars Young modulus                                |
 |L1/m       | distance from the end of the rod to the first WB  |
-|L1/m       | distance from the end of the rod to the second WB |
+|L2/m       | distance from the end of the rod to the second WB |
 
 
 
